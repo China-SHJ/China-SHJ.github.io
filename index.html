@@ -213,13 +213,18 @@
             gap: 10px;
         }
         
-        select, input {
+        select, input, textarea {
             padding: 10px;
             border-radius: 5px;
             border: none;
             background: rgba(255, 255, 255, 0.9);
             font-size: 1rem;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
         }
         
         /* 论坛样式 */
@@ -414,7 +419,7 @@
                         </div>
                         <div class="form-group">
                             <label for="post-content">内容:</label>
-                            <textarea id="post-content" rows="5" required></textarea>
+                            <textarea id="post-content" required></textarea>
                         </div>
                         <button type="submit">发布帖子</button>
                     </form>
@@ -431,6 +436,28 @@
     </div>
 
     <script>
+        // Cookie操作函数
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        }
+        
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        }
+        
         // 游戏主逻辑
         document.addEventListener('DOMContentLoaded', function() {
             // 游戏相关变量
@@ -468,7 +495,7 @@
             let gameOver = false;
             
             // 论坛状态
-            let currentUser = null;
+            let currentUser = getCookie('forumUser');
             let posts = JSON.parse(localStorage.getItem('forumPosts')) || [];
             
             // 初始化棋盘
@@ -1021,6 +1048,8 @@
                 
                 if (user) {
                     currentUser = username;
+                    // 设置Cookie，保存登录状态30天
+                    setCookie('forumUser', username, 30);
                     updateForumUI();
                 } else {
                     alert('用户名或密码错误！');
@@ -1050,18 +1079,22 @@
                 localStorage.setItem('forumUsers', JSON.stringify(users));
                 
                 currentUser = username;
+                // 设置Cookie，保存登录状态30天
+                setCookie('forumUser', username, 30);
                 updateForumUI();
                 
                 // 切换回登录表单
                 registerSection.classList.add('hidden');
                 loginSection.classList.remove('hidden');
                 
-                alert('注册成功！请登录。');
+                alert('注册成功！已自动登录。');
             });
             
             // 用户退出登录
             logoutBtn.addEventListener('click', function() {
                 currentUser = null;
+                // 删除Cookie
+                deleteCookie('forumUser');
                 updateForumUI();
             });
             
