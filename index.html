@@ -3,1189 +3,906 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>五子棋AI游戏与论坛</title>
+    <title>单机版MUD游戏</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: 'Courier New', monospace;
         }
         
         body {
+            background-color: #0a0a0a;
+            color: #c0c0c0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            color: white;
             padding: 20px;
         }
         
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 1200px;
+        .game-container {
             width: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        header {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            margin-bottom: 10px;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .subtitle {
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .tabs {
-            display: flex;
-            width: 100%;
-            margin-bottom: 20px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .tab {
-            padding: 12px 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-radius: 5px 5px 0 0;
-            margin-right: 5px;
-        }
-        
-        .tab.active {
-            background: rgba(255, 255, 255, 0.2);
-            font-weight: bold;
-        }
-        
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        .tab-content {
-            width: 100%;
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-        }
-        
-        .game-area {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            width: 100%;
-        }
-        
-        .board-container {
-            position: relative;
-        }
-        
-        #gameCanvas {
-            background-color: #dcb35c;
+            max-width: 900px;
+            background-color: #000;
+            border: 2px solid #333;
             border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            overflow: hidden;
         }
         
-        .info-panel {
-            flex: 1;
-            min-width: 250px;
+        .game-header {
+            background: linear-gradient(to right, #003300, #001100);
+            color: #0f0;
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .status-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .status-card h2 {
-            margin-bottom: 15px;
+        .game-title {
             font-size: 1.5rem;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 8px;
-        }
-        
-        .player-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .player-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .black-piece {
-            background: radial-gradient(circle at 30% 30%, #333, #000);
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        .white-piece {
-            background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-        }
-        
-        #gameStatus {
-            font-size: 1.3rem;
             font-weight: bold;
-            text-align: center;
-            margin: 10px 0;
-            min-height: 40px;
-            padding: 10px;
-            border-radius: 5px;
-            background: rgba(0, 0, 0, 0.3);
+            text-shadow: 0 0 5px #0f0;
         }
         
-        .controls {
+        .game-status {
+            font-size: 0.9rem;
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        button {
-            flex: 1;
-            min-width: 120px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            background: linear-gradient(to bottom, #4a90e2, #2a5caa);
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        }
-        
-        button:hover {
-            background: linear-gradient(to bottom, #5aa0f0, #3a6cba);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        button:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        #restartBtn {
-            background: linear-gradient(to bottom, #e74c3c, #c0392b);
-        }
-        
-        #restartBtn:hover {
-            background: linear-gradient(to bottom, #f55, #d44);
-        }
-        
-        .difficulty-selector {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        select, input, textarea {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        /* 论坛样式 */
-        .forum-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .login-section, .post-section, .posts-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .login-form, .post-form {
-            display: flex;
-            flex-direction: column;
             gap: 15px;
         }
         
-        .form-group {
+        .game-content {
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            height: 500px;
         }
         
-        .form-group label {
-            font-weight: bold;
-        }
-        
-        .post {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
+        .game-output {
+            flex: 3;
             padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #4a90e2;
-        }
-        
-        .post-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        .post-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .post-content {
+            overflow-y: auto;
+            border-right: 1px solid #333;
             line-height: 1.5;
         }
         
-        .hidden {
-            display: none !important;
+        .game-sidebar {
+            flex: 1;
+            padding: 15px;
+            background-color: #111;
+            overflow-y: auto;
         }
         
-        .instructions {
+        .game-input-container {
+            display: flex;
+            border-top: 1px solid #333;
+            background-color: #111;
+        }
+        
+        .game-prompt {
+            padding: 10px 15px;
+            background-color: #222;
+            color: #0f0;
+            font-weight: bold;
+        }
+        
+        #game-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #0f0;
+            padding: 10px 15px;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-title {
+            color: #0f0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .room-list, .item-list, .npc-list {
+            list-style-type: none;
+        }
+        
+        .room-list li, .item-list li, .npc-list li {
+            padding: 5px 0;
+            border-bottom: 1px dashed #333;
+        }
+        
+        .command-help {
+            font-size: 0.85rem;
+            color: #666;
             margin-top: 20px;
-            font-size: 0.9rem;
-            opacity: 0.8;
-            text-align: center;
         }
         
-        @media (max-width: 768px) {
-            .game-area {
-                flex-direction: column;
-            }
-            
-            .info-panel {
-                width: 100%;
-            }
+        .command-help div {
+            margin-bottom: 5px;
+        }
+        
+        .room-title {
+            color: #0f0;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        .room-description {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .room-exits {
+            font-style: italic;
+            color: #999;
+            margin-bottom: 15px;
+        }
+        
+        .game-message {
+            margin: 10px 0;
+            padding: 8px;
+            border-left: 3px solid #0f0;
+            background-color: rgba(0, 255, 0, 0.05);
+        }
+        
+        .combat-message {
+            color: #ff6b6b;
+            border-left-color: #ff6b6b;
+            background-color: rgba(255, 0, 0, 0.05);
+        }
+        
+        .item-message {
+            color: #ffd700;
+            border-left-color: #ffd700;
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+        
+        .npc-message {
+            color: #87ceeb;
+            border-left-color: #87ceeb;
+            background-color: rgba(135, 206, 235, 0.05);
+        }
+        
+        .health-bar {
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background-color: #0f0;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .item-action {
+            background: #333;
+            color: #c0c0c0;
+            border: none;
+            padding: 2px 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        
+        .item-action:hover {
+            background: #444;
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>五子棋AI游戏与论坛</h1>
-            <p class="subtitle">挑战高级AI，并在论坛分享你的游戏心得</p>
-        </header>
-        
-        <div class="tabs">
-            <button class="tab active" data-tab="game">五子棋游戏</button>
-            <button class="tab" data-tab="forum">游戏论坛</button>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title">单机版MUD游戏</div>
+            <div class="game-status">
+                <div>生命: <span id="player-health">100</span>/100</div>
+                <div>位置: <span id="player-location">村庄广场</span></div>
+                <div>金币: <span id="player-gold">10</span></div>
+            </div>
         </div>
         
-        <!-- 游戏标签页 -->
-        <div id="game-tab" class="tab-content active">
-            <div class="game-area">
-                <div class="board-container">
-                    <canvas id="gameCanvas" width="500" height="500"></canvas>
-                </div>
-                
-                <div class="info-panel">
-                    <div class="status-card">
-                        <h2>游戏状态</h2>
-                        <div class="player-info">
-                            <div class="player-color black-piece"></div>
-                            <span>玩家 (黑棋)</span>
-                        </div>
-                        <div class="player-info">
-                            <div class="player-color white-piece"></div>
-                            <span>AI (白棋)</span>
-                        </div>
-                        <div id="gameStatus">请开始游戏</div>
-                    </div>
-                    
-                    <div class="status-card">
-                        <h2>游戏控制</h2>
-                        <div class="controls">
-                            <button id="startBtn">开始游戏</button>
-                            <button id="restartBtn">重新开始</button>
-                        </div>
-                        
-                        <div class="difficulty-selector">
-                            <label for="difficulty">AI难度:</label>
-                            <select id="difficulty">
-                                <option value="easy">简单</option>
-                                <option value="medium" selected>中等</option>
-                                <option value="hard">困难</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="status-card">
-                        <h2>游戏规则</h2>
-                        <p>玩家执黑先手，AI执白后手。在横、竖或斜方向先连成五子者获胜。</p>
-                    </div>
-                </div>
+        <div class="game-content">
+            <div class="game-output" id="game-output">
+                <!-- 游戏输出将在这里显示 -->
             </div>
             
-            <p class="instructions">点击棋盘交叉点放置棋子，黑棋先行。AI会自动计算最佳落子位置。</p>
-        </div>
-        
-        <!-- 论坛标签页 -->
-        <div id="forum-tab" class="tab-content">
-            <div class="forum-container">
-                <div class="login-section" id="login-section">
-                    <h2>论坛登录</h2>
-                    <form class="login-form" id="login-form">
-                        <div class="form-group">
-                            <label for="username">用户名:</label>
-                            <input type="text" id="username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">密码:</label>
-                            <input type="password" id="password" required>
-                        </div>
-                        <button type="submit">登录</button>
-                    </form>
-                    <p>还没有账号？<a href="#" id="register-link">点击注册</a></p>
+            <div class="game-sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">房间物品</div>
+                    <ul class="item-list" id="room-items">
+                        <!-- 房间物品列表 -->
+                    </ul>
                 </div>
                 
-                <div class="login-section hidden" id="register-section">
-                    <h2>注册新账号</h2>
-                    <form class="login-form" id="register-form">
-                        <div class="form-group">
-                            <label for="new-username">用户名:</label>
-                            <input type="text" id="new-username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="new-password">密码:</label>
-                            <input type="password" id="new-password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirm-password">确认密码:</label>
-                            <input type="password" id="confirm-password" required>
-                        </div>
-                        <button type="submit">注册</button>
-                    </form>
-                    <p>已有账号？<a href="#" id="login-link">点击登录</a></p>
+                <div class="sidebar-section">
+                    <div class="sidebar-title">房间NPC</div>
+                    <ul class="npc-list" id="room-npcs">
+                        <!-- 房间NPC列表 -->
+                    </ul>
                 </div>
                 
-                <div class="user-info hidden" id="user-info">
-                    <h2>欢迎, <span id="welcome-user"></span>!</h2>
-                    <button id="logout-btn">退出登录</button>
+                <div class="sidebar-section">
+                    <div class="sidebar-title">玩家物品</div>
+                    <ul class="item-list" id="player-inventory">
+                        <!-- 玩家物品列表 -->
+                    </ul>
                 </div>
                 
-                <div class="post-section hidden" id="post-section">
-                    <h2>发表新帖子</h2>
-                    <form class="post-form" id="post-form">
-                        <div class="form-group">
-                            <label for="post-title">标题:</label>
-                            <input type="text" id="post-title" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="post-content">内容:</label>
-                            <textarea id="post-content" required></textarea>
-                        </div>
-                        <button type="submit">发布帖子</button>
-                    </form>
-                </div>
-                
-                <div class="posts-section hidden" id="posts-section">
-                    <h2>论坛帖子</h2>
-                    <div id="posts-list">
-                        <!-- 帖子将通过JS动态添加 -->
-                    </div>
+                <div class="command-help">
+                    <div><strong>基本命令:</strong></div>
+                    <div>look - 查看当前房间</div>
+                    <div>go [方向] - 移动到指定方向</div>
+                    <div>get [物品] - 拾取物品</div>
+                    <div>drop [物品] - 丢弃物品</div>
+                    <div>use [物品] - 使用物品</div>
+                    <div>talk [NPC] - 与NPC交谈</div>
+                    <div>attack [NPC] - 攻击NPC</div>
+                    <div>inventory - 查看背包</div>
                 </div>
             </div>
+        </div>
+        
+        <div class="game-input-container">
+            <div class="game-prompt">&gt;</div>
+            <input type="text" id="game-input" placeholder="输入命令..." autofocus>
         </div>
     </div>
 
     <script>
-        // Cookie操作函数
-        function setCookie(name, value, days) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
-        }
-        
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
-        }
-        
-        function deleteCookie(name) {
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-        }
-        
-        // 游戏主逻辑
-        document.addEventListener('DOMContentLoaded', function() {
-            // 游戏相关变量
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            const gameStatus = document.getElementById('gameStatus');
-            const startBtn = document.getElementById('startBtn');
-            const restartBtn = document.getElementById('restartBtn');
-            const difficultySelect = document.getElementById('difficulty');
+        // 游戏数据模型
+        const gameData = {
+            player: {
+                name: "冒险者",
+                health: 100,
+                maxHealth: 100,
+                gold: 10,
+                location: "village_square",
+                inventory: []
+            },
             
-            // 论坛相关变量
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const postForm = document.getElementById('post-form');
-            const loginSection = document.getElementById('login-section');
-            const registerSection = document.getElementById('register-section');
-            const userInfo = document.getElementById('user-info');
-            const postSection = document.getElementById('post-section');
-            const postsSection = document.getElementById('posts-section');
-            const welcomeUser = document.getElementById('welcome-user');
-            const logoutBtn = document.getElementById('logout-btn');
-            const registerLink = document.getElementById('register-link');
-            const loginLink = document.getElementById('login-link');
-            const postsList = document.getElementById('posts-list');
-            
-            // 游戏常量
-            const BOARD_SIZE = 15;
-            const CELL_SIZE = canvas.width / BOARD_SIZE;
-            const PIECE_RADIUS = CELL_SIZE * 0.4;
-            
-            // 游戏状态
-            let gameBoard = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
-            let currentPlayer = 1; // 1为玩家(黑棋)，2为AI(白棋)
-            let gameActive = false;
-            let gameOver = false;
-            
-            // 论坛状态
-            let currentUser = getCookie('forumUser');
-            let posts = JSON.parse(localStorage.getItem('forumPosts')) || [];
-            
-            // 初始化棋盘
-            function initBoard() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            rooms: {
+                village_square: {
+                    name: "村庄广场",
+                    description: "你站在一个宁静的村庄广场上。中央有一座喷泉，四周是古老的石砌建筑。村民们悠闲地走来走去，几个孩子在喷泉边玩耍。东边是铁匠铺，西边是杂货店，北边通往森林，南边是村庄入口。",
+                    exits: {
+                        north: "forest_entrance",
+                        east: "blacksmith",
+                        west: "general_store",
+                        south: "village_gate"
+                    },
+                    items: ["rusty_sword"],
+                    npcs: ["villager"]
+                },
                 
-                // 绘制棋盘背景
-                ctx.fillStyle = '#dcb35c';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                forest_entrance: {
+                    name: "森林入口",
+                    description: "你来到了村庄北边的森林入口。茂密的树木遮天蔽日，一条小径蜿蜒伸入林中。空气中弥漫着泥土和植物的清新气息。你可以听到远处鸟儿的鸣叫声。",
+                    exits: {
+                        south: "village_square",
+                        north: "deep_forest"
+                    },
+                    items: ["health_potion"],
+                    npcs: []
+                },
                 
-                // 绘制棋盘线
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 1;
+                deep_forest: {
+                    name: "森林深处",
+                    description: "你进入了森林深处。这里的光线变得昏暗，树木更加密集。你感到一丝不安，似乎有什么东西在暗处注视着你。地上散落着一些奇怪的骨头。",
+                    exits: {
+                        south: "forest_entrance",
+                        east: "cave_entrance"
+                    },
+                    items: ["gold_coin", "gold_coin"],
+                    npcs: ["goblin"]
+                },
                 
-                for (let i = 0; i < BOARD_SIZE; i++) {
-                    // 横线
-                    ctx.beginPath();
-                    ctx.moveTo(CELL_SIZE / 2, i * CELL_SIZE + CELL_SIZE / 2);
-                    ctx.lineTo(canvas.width - CELL_SIZE / 2, i * CELL_SIZE + CELL_SIZE / 2);
-                    ctx.stroke();
-                    
-                    // 竖线
-                    ctx.beginPath();
-                    ctx.moveTo(i * CELL_SIZE + CELL_SIZE / 2, CELL_SIZE / 2);
-                    ctx.lineTo(i * CELL_SIZE + CELL_SIZE / 2, canvas.height - CELL_SIZE / 2);
-                    ctx.stroke();
+                cave_entrance: {
+                    name: "洞穴入口",
+                    description: "你发现了一个隐蔽的洞穴入口。洞口被藤蔓部分遮掩，里面漆黑一片，散发出潮湿的霉味。你隐约听到洞穴深处传来奇怪的声响。",
+                    exits: {
+                        west: "deep_forest",
+                        enter: "cave_interior"
+                    },
+                    items: ["torch"],
+                    npcs: []
+                },
+                
+                cave_interior: {
+                    name: "洞穴内部",
+                    description: "你进入了洞穴内部。借助微弱的光线，你看到这是一个宽敞的洞穴，墙壁上闪烁着奇异的水晶。洞穴深处似乎有某种生物在移动。",
+                    exits: {
+                        exit: "cave_entrance"
+                    },
+                    items: ["magic_amulet"],
+                    npcs: ["troll"]
+                },
+                
+                blacksmith: {
+                    name: "铁匠铺",
+                    description: "你走进了铁匠铺。炉火熊熊燃烧，墙上挂满了各种武器和工具。铁匠正在工作台前忙碌地敲打着一块烧红的金属。",
+                    exits: {
+                        west: "village_square"
+                    },
+                    items: [],
+                    npcs: ["blacksmith"]
+                },
+                
+                general_store: {
+                    name: "杂货店",
+                    description: "你进入了杂货店。货架上摆满了各种商品，从食物到工具应有尽有。店主站在柜台后面，微笑着迎接你。",
+                    exits: {
+                        east: "village_square"
+                    },
+                    items: ["health_potion", "rope"],
+                    npcs: ["shopkeeper"]
+                },
+                
+                village_gate: {
+                    name: "村庄入口",
+                    description: "你来到了村庄的入口。一座古老的石制拱门标志着村庄的边界。外面是一片广阔的田野，远处是连绵的山脉。",
+                    exits: {
+                        north: "village_square"
+                    },
+                    items: [],
+                    npcs: ["guard"]
                 }
+            },
+            
+            items: {
+                rusty_sword: {
+                    name: "生锈的剑",
+                    description: "一把生锈的旧剑，虽然破旧但仍可使用。",
+                    type: "weapon",
+                    damage: 5,
+                    value: 3
+                },
                 
-                // 绘制天元和星位
-                const starPoints = [3, 7, 11];
-                ctx.fillStyle = '#000';
+                health_potion: {
+                    name: "生命药水",
+                    description: "一瓶红色的药水，可以恢复30点生命值。",
+                    type: "consumable",
+                    heal: 30,
+                    value: 10
+                },
                 
-                for (let i of starPoints) {
-                    for (let j of starPoints) {
-                        ctx.beginPath();
-                        ctx.arc(
-                            i * CELL_SIZE + CELL_SIZE / 2,
-                            j * CELL_SIZE + CELL_SIZE / 2,
-                            CELL_SIZE * 0.1, 0, Math.PI * 2
-                        );
-                        ctx.fill();
+                torch: {
+                    name: "火把",
+                    description: "一支点燃的火把，可以照亮黑暗的地方。",
+                    type: "tool",
+                    value: 2
+                },
+                
+                magic_amulet: {
+                    name: "魔法护身符",
+                    description: "一个古老的护身符，散发着微弱的魔法能量。",
+                    type: "magic",
+                    value: 50
+                },
+                
+                gold_coin: {
+                    name: "金币",
+                    description: "一枚闪亮的金币。",
+                    type: "currency",
+                    value: 1
+                },
+                
+                rope: {
+                    name: "绳子",
+                    description: "一捆结实的绳子，可能有各种用途。",
+                    type: "tool",
+                    value: 5
+                }
+            },
+            
+            npcs: {
+                villager: {
+                    name: "村民",
+                    description: "一个友善的村民，正在广场上散步。",
+                    dialogue: [
+                        "你好，冒险者！欢迎来到我们的村庄。",
+                        "最近森林里不太平静，有人说看到了地精。",
+                        "如果你需要补给，可以去杂货店看看。"
+                    ],
+                    health: 20,
+                    hostile: false
+                },
+                
+                blacksmith: {
+                    name: "铁匠",
+                    description: "一位强壮的铁匠，正在打造武器。",
+                    dialogue: [
+                        "需要武器吗？我这里有些不错的货色。",
+                        "那把生锈的剑？你可以拿走，反正我也不需要它了。",
+                        "听说森林深处的洞穴里有宝藏，但我可不敢去那里。"
+                    ],
+                    health: 50,
+                    hostile: false
+                },
+                
+                shopkeeper: {
+                    name: "店主",
+                    description: "杂货店的店主，正在整理货架。",
+                    dialogue: [
+                        "欢迎光临！需要些什么吗？",
+                        "生命药水？当然有，10金币一瓶。",
+                        "如果你要去森林，带根绳子可能有用。"
+                    ],
+                    health: 30,
+                    hostile: false
+                },
+                
+                guard: {
+                    name: "守卫",
+                    description: "村庄的守卫，正在站岗。",
+                    dialogue: [
+                        "保持警惕，冒险者。最近外面不太安全。",
+                        "如果你要离开村庄，最好带上武器。",
+                        "北边的森林最近有地精出没，小心点。"
+                    ],
+                    health: 60,
+                    hostile: false
+                },
+                
+                goblin: {
+                    name: "地精",
+                    description: "一个丑陋的地精，手持粗糙的木棒。",
+                    dialogue: [
+                        "嘎！人类！离开我们的森林！",
+                        "地精部落会消灭所有入侵者！",
+                        "嘎嘎！我要把你的金币都抢走！"
+                    ],
+                    health: 30,
+                    damage: 8,
+                    hostile: true,
+                    loot: ["gold_coin", "gold_coin"]
+                },
+                
+                troll: {
+                    name: "洞穴巨魔",
+                    description: "一个巨大的洞穴巨魔，散发着恶臭。",
+                    dialogue: [
+                        "吼！谁胆敢闯入我的洞穴！",
+                        "我要把你碾成肉酱！",
+                        "巨魔喜欢闪亮的东西！把你的金币交出来！"
+                    ],
+                    health: 80,
+                    damage: 15,
+                    hostile: true,
+                    loot: ["magic_amulet", "gold_coin", "gold_coin", "gold_coin"]
+                }
+            },
+            
+            commands: {
+                look: {
+                    description: "查看当前房间的描述",
+                    execute: function() {
+                        const room = gameData.rooms[gameData.player.location];
+                        outputRoomDescription(room);
                     }
-                }
-            }
-            
-            // 绘制棋子
-            function drawPiece(row, col, player) {
-                const x = col * CELL_SIZE + CELL_SIZE / 2;
-                const y = row * CELL_SIZE + CELL_SIZE / 2;
+                },
                 
-                ctx.beginPath();
-                ctx.arc(x, y, PIECE_RADIUS, 0, Math.PI * 2);
-                
-                if (player === 1) {
-                    // 黑棋
-                    const gradient = ctx.createRadialGradient(
-                        x - PIECE_RADIUS / 3, y - PIECE_RADIUS / 3, 1,
-                        x, y, PIECE_RADIUS
-                    );
-                    gradient.addColorStop(0, '#666');
-                    gradient.addColorStop(1, '#000');
-                    ctx.fillStyle = gradient;
-                } else {
-                    // 白棋
-                    const gradient = ctx.createRadialGradient(
-                        x - PIECE_RADIUS / 3, y - PIECE_RADIUS / 3, 1,
-                        x, y, PIECE_RADIUS
-                    );
-                    gradient.addColorStop(0, '#fff');
-                    gradient.addColorStop(1, '#ddd');
-                    ctx.fillStyle = gradient;
-                }
-                
-                ctx.fill();
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
-            
-            // 放置棋子
-            function placePiece(row, col, player) {
-                if (gameBoard[row][col] !== 0) return false;
-                
-                gameBoard[row][col] = player;
-                drawPiece(row, col, player);
-                return true;
-            }
-            
-            // 检查胜利条件
-            function checkWin(row, col, player) {
-                // 检查方向: 水平、垂直、左上到右下、右上到左下
-                const directions = [
-                    [0, 1],  // 水平
-                    [1, 0],  // 垂直
-                    [1, 1],  // 左上到右下
-                    [1, -1]  // 右上到左下
-                ];
-                
-                for (const [dx, dy] of directions) {
-                    let count = 1;  // 当前位置已经有一个棋子
-                    
-                    // 正向检查
-                    for (let i = 1; i <= 4; i++) {
-                        const newRow = row + dx * i;
-                        const newCol = col + dy * i;
+                go: {
+                    description: "移动到指定方向",
+                    execute: function(direction) {
+                        const room = gameData.rooms[gameData.player.location];
                         
-                        if (
-                            newRow >= 0 && newRow < BOARD_SIZE &&
-                            newCol >= 0 && newCol < BOARD_SIZE &&
-                            gameBoard[newRow][newCol] === player
-                        ) {
-                            count++;
+                        if (room.exits[direction]) {
+                            gameData.player.location = room.exits[direction];
+                            const newRoom = gameData.rooms[gameData.player.location];
+                            outputGameMessage(`你向${direction}移动。`);
+                            outputRoomDescription(newRoom);
+                            updateUI();
                         } else {
-                            break;
+                            outputGameMessage(`你不能往${direction}走。`, "error");
                         }
                     }
-                    
-                    // 反向检查
-                    for (let i = 1; i <= 4; i++) {
-                        const newRow = row - dx * i;
-                        const newCol = col - dy * i;
+                },
+                
+                get: {
+                    description: "拾取物品",
+                    execute: function(itemName) {
+                        const room = gameData.rooms[gameData.player.location];
+                        const itemKey = findItemInList(room.items, itemName);
                         
-                        if (
-                            newRow >= 0 && newRow < BOARD_SIZE &&
-                            newCol >= 0 && newCol < BOARD_SIZE &&
-                            gameBoard[newRow][newCol] === player
-                        ) {
-                            count++;
+                        if (itemKey) {
+                            // 从房间移除物品
+                            room.items = room.items.filter(item => item !== itemKey);
+                            
+                            // 添加到玩家库存
+                            gameData.player.inventory.push(itemKey);
+                            
+                            outputGameMessage(`你拾取了${gameData.items[itemKey].name}。`, "item");
+                            updateUI();
                         } else {
-                            break;
+                            outputGameMessage(`这里没有"${itemName}"。`, "error");
                         }
                     }
-                    
-                    if (count >= 5) {
-                        return true;
-                    }
-                }
+                },
                 
-                return false;
-            }
-            
-            // 检查棋盘是否已满
-            function isBoardFull() {
-                for (let row = 0; row < BOARD_SIZE; row++) {
-                    for (let col = 0; col < BOARD_SIZE; col++) {
-                        if (gameBoard[row][col] === 0) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            }
-            
-            // AI落子逻辑
-            function aiMove() {
-                if (gameOver || !gameActive) return;
-                
-                // 根据难度设置搜索深度
-                let depth;
-                switch(difficultySelect.value) {
-                    case 'easy':
-                        depth = 1;
-                        break;
-                    case 'medium':
-                        depth = 2;
-                        break;
-                    case 'hard':
-                        depth = 3;
-                        break;
-                    default:
-                        depth = 2;
-                }
-                
-                // 获取最佳移动
-                const bestMove = getBestMove(depth);
-                
-                if (bestMove) {
-                    setTimeout(() => {
-                        placePiece(bestMove.row, bestMove.col, 2);
+                drop: {
+                    description: "丢弃物品",
+                    execute: function(itemName) {
+                        const itemKey = findItemInList(gameData.player.inventory, itemName);
                         
-                        if (checkWin(bestMove.row, bestMove.col, 2)) {
-                            gameStatus.textContent = "AI获胜!";
-                            gameOver = true;
-                        } else if (isBoardFull()) {
-                            gameStatus.textContent = "平局!";
-                            gameOver = true;
+                        if (itemKey) {
+                            // 从玩家库存移除
+                            gameData.player.inventory = gameData.player.inventory.filter(item => item !== itemKey);
+                            
+                            // 添加到房间
+                            gameData.rooms[gameData.player.location].items.push(itemKey);
+                            
+                            outputGameMessage(`你丢弃了${gameData.items[itemKey].name}。`, "item");
+                            updateUI();
                         } else {
-                            currentPlayer = 1;
-                            gameStatus.textContent = "轮到玩家落子";
-                        }
-                    }, 500); // 添加延迟使AI思考更自然
-                }
-            }
-            
-            // 获取最佳移动
-            function getBestMove(depth) {
-                let bestScore = -Infinity;
-                let bestMove = null;
-                
-                // 获取所有可能的移动
-                const moves = getPossibleMoves();
-                
-                // 首先检查AI是否有立即获胜的机会
-                for (const move of moves) {
-                    gameBoard[move.row][move.col] = 2;
-                    if (checkWin(move.row, move.col, 2)) {
-                        gameBoard[move.row][move.col] = 0;
-                        return move; // 直接返回获胜的移动
-                    }
-                    gameBoard[move.row][move.col] = 0;
-                }
-                
-                // 然后检查是否需要防守（玩家有立即获胜的机会）
-                for (const move of moves) {
-                    gameBoard[move.row][move.col] = 1;
-                    if (checkWin(move.row, move.col, 1)) {
-                        gameBoard[move.row][move.col] = 0;
-                        return move; // 防守这个位置
-                    }
-                    gameBoard[move.row][move.col] = 0;
-                }
-                
-                // 如果没有立即获胜或防守的移动，则进行minimax搜索
-                for (const move of moves) {
-                    // 尝试这个移动
-                    gameBoard[move.row][move.col] = 2;
-                    
-                    // 计算分数
-                    const score = minimax(depth - 1, false, -Infinity, Infinity);
-                    
-                    // 撤销移动
-                    gameBoard[move.row][move.col] = 0;
-                    
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestMove = move;
-                    }
-                }
-                
-                return bestMove;
-            }
-            
-            // 极小化极大算法
-            function minimax(depth, isMaximizing, alpha, beta) {
-                // 检查游戏是否结束
-                const gameResult = evaluateBoard();
-                if (gameResult !== 0 || depth === 0) {
-                    return gameResult;
-                }
-                
-                if (isMaximizing) {
-                    let maxScore = -Infinity;
-                    const moves = getPossibleMoves();
-                    
-                    for (const move of moves) {
-                        gameBoard[move.row][move.col] = 2;
-                        const score = minimax(depth - 1, false, alpha, beta);
-                        gameBoard[move.row][move.col] = 0;
-                        
-                        maxScore = Math.max(maxScore, score);
-                        alpha = Math.max(alpha, score);
-                        
-                        if (beta <= alpha) {
-                            break;
+                            outputGameMessage(`你没有"${itemName}"。`, "error");
                         }
                     }
-                    
-                    return maxScore;
-                } else {
-                    let minScore = Infinity;
-                    const moves = getPossibleMoves();
-                    
-                    for (const move of moves) {
-                        gameBoard[move.row][move.col] = 1;
-                        const score = minimax(depth - 1, true, alpha, beta);
-                        gameBoard[move.row][move.col] = 0;
-                        
-                        minScore = Math.min(minScore, score);
-                        beta = Math.min(beta, score);
-                        
-                        if (beta <= alpha) {
-                            break;
-                        }
-                    }
-                    
-                    return minScore;
-                }
-            }
-            
-            // 评估棋盘状态
-            function evaluateBoard() {
-                // 检查AI是否获胜
-                for (let row = 0; row < BOARD_SIZE; row++) {
-                    for (let col = 0; col < BOARD_SIZE; col++) {
-                        if (gameBoard[row][col] === 2 && checkWin(row, col, 2)) {
-                            return 100000;
-                        }
-                        if (gameBoard[row][col] === 1 && checkWin(row, col, 1)) {
-                            return -100000;
-                        }
-                    }
-                }
+                },
                 
-                // 评估棋盘分数
-                let score = 0;
-                
-                // 评估所有可能的五子连线
-                for (let row = 0; row < BOARD_SIZE; row++) {
-                    for (let col = 0; col < BOARD_SIZE; col++) {
-                        if (gameBoard[row][col] !== 0) continue;
+                use: {
+                    description: "使用物品",
+                    execute: function(itemName) {
+                        const itemKey = findItemInList(gameData.player.inventory, itemName);
                         
-                        // 检查周围是否有棋子，如果没有则跳过以提升性能
-                        let hasNeighbor = false;
-                        for (let i = -2; i <= 2; i++) {
-                            for (let j = -2; j <= 2; j++) {
-                                if (i === 0 && j === 0) continue;
+                        if (itemKey) {
+                            const item = gameData.items[itemKey];
+                            
+                            if (item.type === "consumable") {
+                                // 使用消耗品
+                                gameData.player.health = Math.min(
+                                    gameData.player.maxHealth, 
+                                    gameData.player.health + item.heal
+                                );
                                 
-                                const newRow = row + i;
-                                const newCol = col + j;
+                                // 从库存移除
+                                gameData.player.inventory = gameData.player.inventory.filter(i => i !== itemKey);
                                 
-                                if (
-                                    newRow >= 0 && newRow < BOARD_SIZE &&
-                                    newCol >= 0 && newCol < BOARD_SIZE &&
-                                    gameBoard[newRow][newCol] !== 0
-                                ) {
-                                    hasNeighbor = true;
-                                    break;
-                                }
-                            }
-                            if (hasNeighbor) break;
-                        }
-                        
-                        if (!hasNeighbor) continue;
-                        
-                        // 模拟放置AI棋子并评估
-                        gameBoard[row][col] = 2;
-                        score += evaluatePosition(row, col, 2);
-                        gameBoard[row][col] = 1;
-                        score -= evaluatePosition(row, col, 1);
-                        gameBoard[row][col] = 0;
-                    }
-                }
-                
-                return score;
-            }
-            
-            // 评估特定位置的分数
-            function evaluatePosition(row, col, player) {
-                let score = 0;
-                const directions = [
-                    [0, 1], [1, 0], [1, 1], [1, -1]
-                ];
-                
-                for (const [dx, dy] of directions) {
-                    let count = 1; // 当前位置的棋子
-                    let openEnds = 0;
-                    
-                    // 正向检查
-                    let blocked = false;
-                    for (let i = 1; i <= 4; i++) {
-                        const newRow = row + dx * i;
-                        const newCol = col + dy * i;
-                        
-                        if (
-                            newRow >= 0 && newRow < BOARD_SIZE &&
-                            newCol >= 0 && newCol < BOARD_SIZE
-                        ) {
-                            if (gameBoard[newRow][newCol] === player) {
-                                count++;
-                            } else if (gameBoard[newRow][newCol] === 0) {
-                                openEnds++;
-                                break;
+                                outputGameMessage(`你使用了${item.name}，恢复了${item.heal}点生命值。`, "item");
+                                updateUI();
                             } else {
-                                blocked = true;
-                                break;
+                                outputGameMessage(`你不能使用${item.name}。`, "error");
                             }
                         } else {
-                            blocked = true;
-                            break;
+                            outputGameMessage(`你没有"${itemName}"。`, "error");
                         }
                     }
-                    
-                    // 反向检查
-                    for (let i = 1; i <= 4; i++) {
-                        const newRow = row - dx * i;
-                        const newCol = col - dy * i;
+                },
+                
+                talk: {
+                    description: "与NPC交谈",
+                    execute: function(npcName) {
+                        const room = gameData.rooms[gameData.player.location];
+                        const npcKey = findNPCInList(room.npcs, npcName);
                         
-                        if (
-                            newRow >= 0 && newRow < BOARD_SIZE &&
-                            newCol >= 0 && newCol < BOARD_SIZE
-                        ) {
-                            if (gameBoard[newRow][newCol] === player) {
-                                count++;
-                            } else if (gameBoard[newRow][newCol] === 0) {
-                                openEnds++;
-                                break;
-                            } else {
-                                blocked = true;
-                                break;
-                            }
+                        if (npcKey) {
+                            const npc = gameData.npcs[npcKey];
+                            const dialogue = npc.dialogue[Math.floor(Math.random() * npc.dialogue.length)];
+                            
+                            outputGameMessage(`${npc.name}说："${dialogue}"`, "npc");
                         } else {
-                            blocked = true;
-                            break;
+                            outputGameMessage(`这里没有"${npcName}"。`, "error");
                         }
                     }
-                    
-                    // 根据连子数和开放端评分
-                    if (count >= 5) {
-                        score += 100000;
-                    } else if (count === 4) {
-                        if (openEnds === 2) {
-                            score += 10000; // 活四
-                        } else if (openEnds === 1) {
-                            score += 1000; // 冲四
-                        }
-                    } else if (count === 3) {
-                        if (openEnds === 2) {
-                            score += 1000; // 活三
-                        } else if (openEnds === 1) {
-                            score += 100; // 眠三
-                        }
-                    } else if (count === 2) {
-                        if (openEnds === 2) {
-                            score += 100; // 活二
-                        } else if (openEnds === 1) {
-                            score += 10; // 眠二
-                        }
-                    } else if (count === 1 && openEnds === 2) {
-                        score += 5; // 单子但有发展潜力
-                    }
-                }
+                },
                 
-                return score;
-            }
-            
-            // 获取所有可能的移动
-            function getPossibleMoves() {
-                const moves = [];
-                
-                // 只考虑已有棋子周围的空位，提升性能
-                for (let row = 0; row < BOARD_SIZE; row++) {
-                    for (let col = 0; col < BOARD_SIZE; col++) {
-                        if (gameBoard[row][col] !== 0) continue;
+                attack: {
+                    description: "攻击NPC",
+                    execute: function(npcName) {
+                        const room = gameData.rooms[gameData.player.location];
+                        const npcKey = findNPCInList(room.npcs, npcName);
                         
-                        // 检查周围是否有棋子
-                        let hasNeighbor = false;
-                        for (let i = -2; i <= 2; i++) {
-                            for (let j = -2; j <= 2; j++) {
-                                if (i === 0 && j === 0) continue;
+                        if (npcKey) {
+                            const npc = gameData.npcs[npcKey];
+                            
+                            if (npc.hostile) {
+                                // 计算玩家伤害
+                                let playerDamage = 2; // 基础伤害
                                 
-                                const newRow = row + i;
-                                const newCol = col + j;
+                                // 检查武器
+                                const weapon = gameData.player.inventory.find(item => 
+                                    gameData.items[item].type === "weapon"
+                                );
                                 
-                                if (
-                                    newRow >= 0 && newRow < BOARD_SIZE &&
-                                    newCol >= 0 && newCol < BOARD_SIZE &&
-                                    gameBoard[newRow][newCol] !== 0
-                                ) {
-                                    hasNeighbor = true;
-                                    break;
+                                if (weapon) {
+                                    playerDamage += gameData.items[weapon].damage;
                                 }
+                                
+                                // 攻击NPC
+                                npc.health -= playerDamage;
+                                outputGameMessage(`你攻击了${npc.name}，造成了${playerDamage}点伤害。`, "combat");
+                                
+                                // 检查NPC是否死亡
+                                if (npc.health <= 0) {
+                                    outputGameMessage(`你击败了${npc.name}！`, "combat");
+                                    
+                                    // 移除NPC
+                                    room.npcs = room.npcs.filter(n => n !== npcKey);
+                                    
+                                    // 掉落物品
+                                    if (npc.loot) {
+                                        npc.loot.forEach(item => {
+                                            room.items.push(item);
+                                        });
+                                        outputGameMessage(`${npc.name}掉落了一些物品。`, "item");
+                                    }
+                                } else {
+                                    // NPC反击
+                                    const npcDamage = npc.damage || 5;
+                                    gameData.player.health -= npcDamage;
+                                    outputGameMessage(`${npc.name}反击，对你造成了${npcDamage}点伤害。`, "combat");
+                                    
+                                    // 检查玩家是否死亡
+                                    if (gameData.player.health <= 0) {
+                                        outputGameMessage("你被击败了！游戏结束。", "combat");
+                                        gameData.player.health = 0;
+                                    }
+                                }
+                                
+                                updateUI();
+                            } else {
+                                outputGameMessage(`${npc.name}是友善的，你不能攻击他。`, "error");
                             }
-                            if (hasNeighbor) break;
-                        }
-                        
-                        if (hasNeighbor) {
-                            moves.push({ row, col });
-                        }
-                    }
-                }
-                
-                // 如果没有找到可能的移动（游戏刚开始），返回中心点
-                if (moves.length === 0) {
-                    moves.push({ row: Math.floor(BOARD_SIZE / 2), col: Math.floor(BOARD_SIZE / 2) });
-                }
-                
-                return moves;
-            }
-            
-            // 开始游戏
-            function startGame() {
-                gameBoard = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
-                currentPlayer = 1;
-                gameActive = true;
-                gameOver = false;
-                
-                initBoard();
-                gameStatus.textContent = "轮到玩家落子";
-                
-                startBtn.disabled = true;
-            }
-            
-            // 重新开始游戏
-            function restartGame() {
-                startGame();
-            }
-            
-            // 处理棋盘点击事件
-            canvas.addEventListener('click', function(event) {
-                if (!gameActive || gameOver || currentPlayer !== 1) return;
-                
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                
-                const col = Math.round((x - CELL_SIZE / 2) / CELL_SIZE);
-                const row = Math.round((y - CELL_SIZE / 2) / CELL_SIZE);
-                
-                if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
-                    if (placePiece(row, col, currentPlayer)) {
-                        if (checkWin(row, col, currentPlayer)) {
-                            gameStatus.textContent = "玩家获胜!";
-                            gameOver = true;
-                        } else if (isBoardFull()) {
-                            gameStatus.textContent = "平局!";
-                            gameOver = true;
                         } else {
-                            currentPlayer = 2;
-                            gameStatus.textContent = "AI思考中...";
-                            aiMove();
+                            outputGameMessage(`这里没有"${npcName}"。`, "error");
                         }
                     }
+                },
+                
+                inventory: {
+                    description: "查看背包",
+                    execute: function() {
+                        if (gameData.player.inventory.length === 0) {
+                            outputGameMessage("你的背包是空的。");
+                        } else {
+                            outputGameMessage("你的背包中有：");
+                            gameData.player.inventory.forEach(itemKey => {
+                                const item = gameData.items[itemKey];
+                                outputGameMessage(`- ${item.name}: ${item.description}`);
+                            });
+                        }
+                    }
+                },
+                
+                help: {
+                    description: "显示帮助信息",
+                    execute: function() {
+                        outputGameMessage("可用命令:");
+                        Object.keys(gameData.commands).forEach(command => {
+                            outputGameMessage(`- ${command}: ${gameData.commands[command].description}`);
+                        });
+                    }
                 }
+            }
+        };
+
+        // 工具函数
+        function findItemInList(itemList, itemName) {
+            return itemList.find(itemKey => {
+                const item = gameData.items[itemKey];
+                return item.name.toLowerCase().includes(itemName.toLowerCase());
+            });
+        }
+
+        function findNPCInList(npcList, npcName) {
+            return npcList.find(npcKey => {
+                const npc = gameData.npcs[npcKey];
+                return npc.name.toLowerCase().includes(npcName.toLowerCase());
+            });
+        }
+
+        // UI更新函数
+        function outputGameMessage(message, type = "normal") {
+            const output = document.getElementById("game-output");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `game-message ${type}-message`;
+            messageDiv.textContent = message;
+            output.appendChild(messageDiv);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function outputRoomDescription(room) {
+            const output = document.getElementById("game-output");
+            
+            // 清空输出
+            output.innerHTML = "";
+            
+            // 输出房间标题和描述
+            const titleDiv = document.createElement("div");
+            titleDiv.className = "room-title";
+            titleDiv.textContent = room.name;
+            output.appendChild(titleDiv);
+            
+            const descDiv = document.createElement("div");
+            descDiv.className = "room-description";
+            descDiv.textContent = room.description;
+            output.appendChild(descDiv);
+            
+            // 输出出口
+            const exitsDiv = document.createElement("div");
+            exitsDiv.className = "room-exits";
+            exitsDiv.textContent = `出口: ${Object.keys(room.exits).join(", ")}`;
+            output.appendChild(exitsDiv);
+            
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateUI() {
+            // 更新玩家状态
+            document.getElementById("player-health").textContent = gameData.player.health;
+            document.getElementById("player-location").textContent = gameData.rooms[gameData.player.location].name;
+            document.getElementById("player-gold").textContent = gameData.player.gold;
+            
+            // 更新房间物品列表
+            const roomItemsList = document.getElementById("room-items");
+            roomItemsList.innerHTML = "";
+            
+            const currentRoom = gameData.rooms[gameData.player.location];
+            currentRoom.items.forEach(itemKey => {
+                const item = gameData.items[itemKey];
+                const li = document.createElement("li");
+                li.textContent = item.name;
+                roomItemsList.appendChild(li);
             });
             
-            // 论坛功能
+            if (currentRoom.items.length === 0) {
+                const li = document.createElement("li");
+                li.textContent = "无";
+                roomItemsList.appendChild(li);
+            }
             
-            // 切换登录/注册表单
-            registerLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                loginSection.classList.add('hidden');
-                registerSection.classList.remove('hidden');
+            // 更新房间NPC列表
+            const roomNPCsList = document.getElementById("room-npcs");
+            roomNPCsList.innerHTML = "";
+            
+            currentRoom.npcs.forEach(npcKey => {
+                const npc = gameData.npcs[npcKey];
+                const li = document.createElement("li");
+                li.textContent = npc.name;
+                roomNPCsList.appendChild(li);
             });
             
-            loginLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                registerSection.classList.add('hidden');
-                loginSection.classList.remove('hidden');
-            });
+            if (currentRoom.npcs.length === 0) {
+                const li = document.createElement("li");
+                li.textContent = "无";
+                roomNPCsList.appendChild(li);
+            }
             
-            // 用户登录
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
+            // 更新玩家物品列表
+            const playerInventoryList = document.getElementById("player-inventory");
+            playerInventoryList.innerHTML = "";
+            
+            gameData.player.inventory.forEach(itemKey => {
+                const item = gameData.items[itemKey];
+                const li = document.createElement("li");
+                li.className = "inventory-item";
                 
-                // 简单验证（实际应用中需要后端验证）
-                const users = JSON.parse(localStorage.getItem('forumUsers')) || [];
-                const user = users.find(u => u.username === username && u.password === password);
+                const itemName = document.createElement("span");
+                itemName.textContent = item.name;
                 
-                if (user) {
-                    currentUser = username;
-                    // 设置Cookie，保存登录状态30天
-                    setCookie('forumUser', username, 30);
-                    updateForumUI();
-                } else {
-                    alert('用户名或密码错误！');
+                const itemActions = document.createElement("div");
+                itemActions.className = "item-actions";
+                
+                if (item.type === "consumable") {
+                    const useButton = document.createElement("button");
+                    useButton.className = "item-action";
+                    useButton.textContent = "使用";
+                    useButton.onclick = () => {
+                        executeCommand("use", item.name);
+                    };
+                    itemActions.appendChild(useButton);
                 }
-            });
-            
-            // 用户注册
-            registerForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('new-username').value;
-                const password = document.getElementById('new-password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
                 
-                if (password !== confirmPassword) {
-                    alert('两次输入的密码不一致！');
-                    return;
-                }
-                
-                const users = JSON.parse(localStorage.getItem('forumUsers')) || [];
-                
-                if (users.find(u => u.username === username)) {
-                    alert('用户名已存在！');
-                    return;
-                }
-                
-                users.push({ username, password });
-                localStorage.setItem('forumUsers', JSON.stringify(users));
-                
-                currentUser = username;
-                // 设置Cookie，保存登录状态30天
-                setCookie('forumUser', username, 30);
-                updateForumUI();
-                
-                // 切换回登录表单
-                registerSection.classList.add('hidden');
-                loginSection.classList.remove('hidden');
-                
-                alert('注册成功！已自动登录。');
-            });
-            
-            // 用户退出登录
-            logoutBtn.addEventListener('click', function() {
-                currentUser = null;
-                // 删除Cookie
-                deleteCookie('forumUser');
-                updateForumUI();
-            });
-            
-            // 发布帖子
-            postForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const title = document.getElementById('post-title').value;
-                const content = document.getElementById('post-content').value;
-                
-                const newPost = {
-                    id: Date.now(),
-                    title,
-                    content,
-                    author: currentUser,
-                    date: new Date().toLocaleString()
+                const dropButton = document.createElement("button");
+                dropButton.className = "item-action";
+                dropButton.textContent = "丢弃";
+                dropButton.onclick = () => {
+                    executeCommand("drop", item.name);
                 };
+                itemActions.appendChild(dropButton);
                 
-                posts.unshift(newPost);
-                localStorage.setItem('forumPosts', JSON.stringify(posts));
-                
-                document.getElementById('post-title').value = '';
-                document.getElementById('post-content').value = '';
-                
-                renderPosts();
+                li.appendChild(itemName);
+                li.appendChild(itemActions);
+                playerInventoryList.appendChild(li);
             });
             
-            // 更新论坛UI
-            function updateForumUI() {
-                if (currentUser) {
-                    loginSection.classList.add('hidden');
-                    registerSection.classList.add('hidden');
-                    userInfo.classList.remove('hidden');
-                    postSection.classList.remove('hidden');
-                    postsSection.classList.remove('hidden');
-                    
-                    welcomeUser.textContent = currentUser;
-                } else {
-                    userInfo.classList.add('hidden');
-                    postSection.classList.add('hidden');
-                    postsSection.classList.add('hidden');
-                    loginSection.classList.remove('hidden');
-                }
-                
-                renderPosts();
+            if (gameData.player.inventory.length === 0) {
+                const li = document.createElement("li");
+                li.textContent = "无";
+                playerInventoryList.appendChild(li);
             }
-            
-            // 渲染帖子列表
-            function renderPosts() {
-                postsList.innerHTML = '';
-                
-                if (posts.length === 0) {
-                    postsList.innerHTML = '<p>暂无帖子，成为第一个发帖的人吧！</p>';
-                    return;
-                }
-                
-                posts.forEach(post => {
-                    const postElement = document.createElement('div');
-                    postElement.className = 'post';
-                    postElement.innerHTML = `
-                        <div class="post-header">
-                            <span class="post-author">作者: ${post.author}</span>
-                            <span class="post-date">${post.date}</span>
-                        </div>
-                        <div class="post-title">${post.title}</div>
-                        <div class="post-content">${post.content}</div>
-                    `;
-                    postsList.appendChild(postElement);
-                });
+        }
+
+        // 命令执行函数
+        function executeCommand(command, argument = "") {
+            if (gameData.commands[command]) {
+                gameData.commands[command].execute(argument);
+            } else {
+                outputGameMessage(`未知命令: ${command}。输入"help"查看可用命令。`, "error");
             }
+        }
+
+        // 初始化游戏
+        function initGame() {
+            // 显示初始房间描述
+            const initialRoom = gameData.rooms[gameData.player.location];
+            outputRoomDescription(initialRoom);
             
-            // 选项卡切换
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // 移除所有active类
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            // 更新UI
+            updateUI();
+            
+            // 设置命令输入处理
+            const gameInput = document.getElementById("game-input");
+            gameInput.addEventListener("keypress", function(e) {
+                if (e.key === "Enter") {
+                    const input = this.value.trim();
+                    this.value = "";
                     
-                    // 添加active类到当前选项卡
-                    this.classList.add('active');
-                    document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
-                });
+                    if (input) {
+                        // 输出玩家输入
+                        const output = document.getElementById("game-output");
+                        const inputDiv = document.createElement("div");
+                        inputDiv.style.color = "#0f0";
+                        inputDiv.textContent = `> ${input}`;
+                        output.appendChild(inputDiv);
+                        output.scrollTop = output.scrollHeight;
+                        
+                        // 解析并执行命令
+                        const parts = input.split(" ");
+                        const command = parts[0].toLowerCase();
+                        const argument = parts.slice(1).join(" ");
+                        
+                        executeCommand(command, argument);
+                    }
+                }
             });
             
-            // 按钮事件监听
-            startBtn.addEventListener('click', startGame);
-            restartBtn.addEventListener('click', restartGame);
-            
-            // 初始化棋盘和论坛
-            initBoard();
-            updateForumUI();
-        });
+            // 欢迎信息
+            outputGameMessage("欢迎来到单机版MUD游戏！输入'help'查看可用命令。");
+        }
+
+        // 启动游戏
+        window.onload = initGame;
     </script>
 </body>
 </html>
