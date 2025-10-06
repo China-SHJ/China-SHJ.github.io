@@ -3,906 +3,557 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单机版MUD游戏</title>
+    <title>密码保护小说阅读器</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Courier New', monospace;
+            font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Microsoft YaHei', serif;
         }
         
         body {
-            background-color: #0a0a0a;
-            color: #c0c0c0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
         
-        .game-container {
+        .container {
+            max-width: 1200px;
             width: 100%;
-            max-width: 900px;
-            background-color: #000;
-            border: 2px solid #333;
-            border-radius: 5px;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-            overflow: hidden;
-        }
-        
-        .game-header {
-            background: linear-gradient(to right, #003300, #001100);
-            color: #0f0;
-            padding: 10px 15px;
-            border-bottom: 1px solid #333;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
         }
         
-        .game-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 5px #0f0;
+        .password-screen {
+            background: rgba(10, 15, 35, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s ease;
         }
         
-        .game-status {
-            font-size: 0.9rem;
+        .password-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #4cc9f0;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+        }
+        
+        .password-screen p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #a0aec0;
+        }
+        
+        .password-input {
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            gap: 20px;
         }
         
-        .game-content {
-            display: flex;
-            height: 500px;
-        }
-        
-        .game-output {
-            flex: 3;
-            padding: 15px;
-            overflow-y: auto;
-            border-right: 1px solid #333;
-            line-height: 1.5;
-        }
-        
-        .game-sidebar {
-            flex: 1;
-            padding: 15px;
-            background-color: #111;
-            overflow-y: auto;
-        }
-        
-        .game-input-container {
-            display: flex;
-            border-top: 1px solid #333;
-            background-color: #111;
-        }
-        
-        .game-prompt {
-            padding: 10px 15px;
-            background-color: #222;
-            color: #0f0;
-            font-weight: bold;
-        }
-        
-        #game-input {
-            flex: 1;
-            background: transparent;
+        input[type="password"] {
+            padding: 15px 20px;
+            border-radius: 50px;
             border: none;
-            color: #0f0;
-            padding: 10px 15px;
-            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            transition: all 0.3s ease;
             outline: none;
         }
         
-        .sidebar-section {
-            margin-bottom: 20px;
+        input[type="password"]:focus {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.4);
         }
         
-        .sidebar-title {
-            color: #0f0;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
+        button {
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+            color: white;
             font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
-        .room-list, .item-list, .npc-list {
-            list-style-type: none;
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
         }
         
-        .room-list li, .item-list li, .npc-list li {
-            padding: 5px 0;
-            border-bottom: 1px dashed #333;
+        .error-message {
+            color: #f72585;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            height: 20px;
         }
         
-        .command-help {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 20px;
-        }
-        
-        .command-help div {
-            margin-bottom: 5px;
-        }
-        
-        .room-title {
-            color: #0f0;
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-        }
-        
-        .room-description {
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        
-        .room-exits {
-            font-style: italic;
-            color: #999;
-            margin-bottom: 15px;
-        }
-        
-        .game-message {
-            margin: 10px 0;
-            padding: 8px;
-            border-left: 3px solid #0f0;
-            background-color: rgba(0, 255, 0, 0.05);
-        }
-        
-        .combat-message {
-            color: #ff6b6b;
-            border-left-color: #ff6b6b;
-            background-color: rgba(255, 0, 0, 0.05);
-        }
-        
-        .item-message {
-            color: #ffd700;
-            border-left-color: #ffd700;
-            background-color: rgba(255, 215, 0, 0.05);
-        }
-        
-        .npc-message {
-            color: #87ceeb;
-            border-left-color: #87ceeb;
-            background-color: rgba(135, 206, 235, 0.05);
-        }
-        
-        .health-bar {
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            margin-top: 5px;
+        .reader-container {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            background: rgba(10, 15, 35, 0.8);
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-direction: column;
+            height: 85vh;
         }
         
-        .health-fill {
-            height: 100%;
-            background-color: #0f0;
-            border-radius: 5px;
-            transition: width 0.3s;
+        .reader-header {
+            background: rgba(15, 20, 45, 0.9);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        .inventory-item {
+        .book-title {
+            font-size: 1.8rem;
+            color: #4cc9f0;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+        }
+        
+        .chapter-title {
+            font-size: 1.3rem;
+            color: #f8f9fa;
+        }
+        
+        .reader-content {
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            background: rgba(10, 15, 35, 0.5);
+            text-align: justify;
+        }
+        
+        .reader-content p {
+            margin-bottom: 20px;
+            text-indent: 2em;
+        }
+        
+        .reader-footer {
+            background: rgba(15, 20, 45, 0.9);
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        .item-actions {
+        .navigation-buttons {
             display: flex;
-            gap: 5px;
+            gap: 10px;
         }
         
-        .item-action {
-            background: #333;
-            color: #c0c0c0;
-            border: none;
-            padding: 2px 5px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.7rem;
+        .chapter-indicator {
+            font-size: 0.9rem;
+            color: #a0aec0;
         }
         
-        .item-action:hover {
-            background: #444;
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #4cc9f0;
         }
         
-        /* 滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .spinner {
+            border: 4px solid rgba(76, 201, 240, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #4cc9f0;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
         
-        ::-webkit-scrollbar-track {
-            background: #111;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
+        .decoration {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(76, 201, 240, 0.1) 0%, transparent 70%);
+            z-index: -1;
         }
         
-        ::-webkit-scrollbar-thumb:hover {
-            background: #444;
+        .decoration:nth-child(1) {
+            top: 10%;
+            left: 10%;
+        }
+        
+        .decoration:nth-child(2) {
+            bottom: 10%;
+            right: 10%;
+        }
+        
+        @media (max-width: 768px) {
+            .password-screen {
+                padding: 30px 20px;
+            }
+            
+            .password-screen h1 {
+                font-size: 2rem;
+            }
+            
+            .reader-container {
+                height: 90vh;
+            }
+            
+            .reader-content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="game-header">
-            <div class="game-title">单机版MUD游戏</div>
-            <div class="game-status">
-                <div>生命: <span id="player-health">100</span>/100</div>
-                <div>位置: <span id="player-location">村庄广场</span></div>
-                <div>金币: <span id="player-gold">10</span></div>
+    <div class="decoration"></div>
+    <div class="decoration"></div>
+    
+    <div class="container">
+        <div class="password-screen" id="passwordScreen">
+            <h1>小说阅读器</h1>
+            <p>请输入访问密码查看精彩内容</p>
+            <div class="password-input">
+                <input type="password" id="passwordInput" placeholder="请输入访问密码">
+                <button id="submitPassword">进入阅读</button>
+                <div class="error-message" id="errorMessage"></div>
             </div>
         </div>
         
-        <div class="game-content">
-            <div class="game-output" id="game-output">
-                <!-- 游戏输出将在这里显示 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在加载小说内容...</p>
+        </div>
+        
+        <div class="reader-container" id="readerContainer">
+            <div class="reader-header">
+                <div class="book-title" id="bookTitle">加载中...</div>
+                <div class="chapter-title" id="chapterTitle">第1章 世界树</div>
             </div>
             
-            <div class="game-sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-title">房间物品</div>
-                    <ul class="item-list" id="room-items">
-                        <!-- 房间物品列表 -->
-                    </ul>
-                </div>
-                
-                <div class="sidebar-section">
-                    <div class="sidebar-title">房间NPC</div>
-                    <ul class="npc-list" id="room-npcs">
-                        <!-- 房间NPC列表 -->
-                    </ul>
-                </div>
-                
-                <div class="sidebar-section">
-                    <div class="sidebar-title">玩家物品</div>
-                    <ul class="item-list" id="player-inventory">
-                        <!-- 玩家物品列表 -->
-                    </ul>
-                </div>
-                
-                <div class="command-help">
-                    <div><strong>基本命令:</strong></div>
-                    <div>look - 查看当前房间</div>
-                    <div>go [方向] - 移动到指定方向</div>
-                    <div>get [物品] - 拾取物品</div>
-                    <div>drop [物品] - 丢弃物品</div>
-                    <div>use [物品] - 使用物品</div>
-                    <div>talk [NPC] - 与NPC交谈</div>
-                    <div>attack [NPC] - 攻击NPC</div>
-                    <div>inventory - 查看背包</div>
-                </div>
+            <div class="reader-content" id="readerContent">
+                <!-- 小说内容将通过JavaScript动态加载 -->
             </div>
-        </div>
-        
-        <div class="game-input-container">
-            <div class="game-prompt">&gt;</div>
-            <input type="text" id="game-input" placeholder="输入命令..." autofocus>
+            
+            <div class="reader-footer">
+                <div class="navigation-buttons">
+                    <button id="prevChapter">上一章</button>
+                    <button id="nextChapter">下一章</button>
+                </div>
+                <div class="chapter-indicator" id="chapterIndicator">第1章/共10章</div>
+            </div>
         </div>
     </div>
-
+    
     <script>
-        // 游戏数据模型
-        const gameData = {
-            player: {
-                name: "冒险者",
-                health: 100,
-                maxHealth: 100,
-                gold: 10,
-                location: "village_square",
-                inventory: []
-            },
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM元素
+            const passwordScreen = document.getElementById('passwordScreen');
+            const passwordInput = document.getElementById('passwordInput');
+            const submitPassword = document.getElementById('submitPassword');
+            const errorMessage = document.getElementById('errorMessage');
+            const loading = document.getElementById('loading');
+            const readerContainer = document.getElementById('readerContainer');
+            const bookTitle = document.getElementById('bookTitle');
+            const chapterTitle = document.getElementById('chapterTitle');
+            const readerContent = document.getElementById('readerContent');
+            const prevChapterBtn = document.getElementById('prevChapter');
+            const nextChapterBtn = document.getElementById('nextChapter');
+            const chapterIndicator = document.getElementById('chapterIndicator');
             
-            rooms: {
-                village_square: {
-                    name: "村庄广场",
-                    description: "你站在一个宁静的村庄广场上。中央有一座喷泉，四周是古老的石砌建筑。村民们悠闲地走来走去，几个孩子在喷泉边玩耍。东边是铁匠铺，西边是杂货店，北边通往森林，南边是村庄入口。",
-                    exits: {
-                        north: "forest_entrance",
-                        east: "blacksmith",
-                        west: "general_store",
-                        south: "village_gate"
-                    },
-                    items: ["rusty_sword"],
-                    npcs: ["villager"]
-                },
-                
-                forest_entrance: {
-                    name: "森林入口",
-                    description: "你来到了村庄北边的森林入口。茂密的树木遮天蔽日，一条小径蜿蜒伸入林中。空气中弥漫着泥土和植物的清新气息。你可以听到远处鸟儿的鸣叫声。",
-                    exits: {
-                        south: "village_square",
-                        north: "deep_forest"
-                    },
-                    items: ["health_potion"],
-                    npcs: []
-                },
-                
-                deep_forest: {
-                    name: "森林深处",
-                    description: "你进入了森林深处。这里的光线变得昏暗，树木更加密集。你感到一丝不安，似乎有什么东西在暗处注视着你。地上散落着一些奇怪的骨头。",
-                    exits: {
-                        south: "forest_entrance",
-                        east: "cave_entrance"
-                    },
-                    items: ["gold_coin", "gold_coin"],
-                    npcs: ["goblin"]
-                },
-                
-                cave_entrance: {
-                    name: "洞穴入口",
-                    description: "你发现了一个隐蔽的洞穴入口。洞口被藤蔓部分遮掩，里面漆黑一片，散发出潮湿的霉味。你隐约听到洞穴深处传来奇怪的声响。",
-                    exits: {
-                        west: "deep_forest",
-                        enter: "cave_interior"
-                    },
-                    items: ["torch"],
-                    npcs: []
-                },
-                
-                cave_interior: {
-                    name: "洞穴内部",
-                    description: "你进入了洞穴内部。借助微弱的光线，你看到这是一个宽敞的洞穴，墙壁上闪烁着奇异的水晶。洞穴深处似乎有某种生物在移动。",
-                    exits: {
-                        exit: "cave_entrance"
-                    },
-                    items: ["magic_amulet"],
-                    npcs: ["troll"]
-                },
-                
-                blacksmith: {
-                    name: "铁匠铺",
-                    description: "你走进了铁匠铺。炉火熊熊燃烧，墙上挂满了各种武器和工具。铁匠正在工作台前忙碌地敲打着一块烧红的金属。",
-                    exits: {
-                        west: "village_square"
-                    },
-                    items: [],
-                    npcs: ["blacksmith"]
-                },
-                
-                general_store: {
-                    name: "杂货店",
-                    description: "你进入了杂货店。货架上摆满了各种商品，从食物到工具应有尽有。店主站在柜台后面，微笑着迎接你。",
-                    exits: {
-                        east: "village_square"
-                    },
-                    items: ["health_potion", "rope"],
-                    npcs: ["shopkeeper"]
-                },
-                
-                village_gate: {
-                    name: "村庄入口",
-                    description: "你来到了村庄的入口。一座古老的石制拱门标志着村庄的边界。外面是一片广阔的田野，远处是连绵的山脉。",
-                    exits: {
-                        north: "village_square"
-                    },
-                    items: [],
-                    npcs: ["guard"]
-                }
-            },
+            // 小说数据
+            let novelData = {
+                title: '',
+                chapters: [],
+                currentChapterIndex: 0
+            };
             
-            items: {
-                rusty_sword: {
-                    name: "生锈的剑",
-                    description: "一把生锈的旧剑，虽然破旧但仍可使用。",
-                    type: "weapon",
-                    damage: 5,
-                    value: 3
-                },
-                
-                health_potion: {
-                    name: "生命药水",
-                    description: "一瓶红色的药水，可以恢复30点生命值。",
-                    type: "consumable",
-                    heal: 30,
-                    value: 10
-                },
-                
-                torch: {
-                    name: "火把",
-                    description: "一支点燃的火把，可以照亮黑暗的地方。",
-                    type: "tool",
-                    value: 2
-                },
-                
-                magic_amulet: {
-                    name: "魔法护身符",
-                    description: "一个古老的护身符，散发着微弱的魔法能量。",
-                    type: "magic",
-                    value: 50
-                },
-                
-                gold_coin: {
-                    name: "金币",
-                    description: "一枚闪亮的金币。",
-                    type: "currency",
-                    value: 1
-                },
-                
-                rope: {
-                    name: "绳子",
-                    description: "一捆结实的绳子，可能有各种用途。",
-                    type: "tool",
-                    value: 5
-                }
-            },
+            // 正确密码
+            const CORRECT_PASSWORD = '5712zs';
             
-            npcs: {
-                villager: {
-                    name: "村民",
-                    description: "一个友善的村民，正在广场上散步。",
-                    dialogue: [
-                        "你好，冒险者！欢迎来到我们的村庄。",
-                        "最近森林里不太平静，有人说看到了地精。",
-                        "如果你需要补给，可以去杂货店看看。"
-                    ],
-                    health: 20,
-                    hostile: false
-                },
-                
-                blacksmith: {
-                    name: "铁匠",
-                    description: "一位强壮的铁匠，正在打造武器。",
-                    dialogue: [
-                        "需要武器吗？我这里有些不错的货色。",
-                        "那把生锈的剑？你可以拿走，反正我也不需要它了。",
-                        "听说森林深处的洞穴里有宝藏，但我可不敢去那里。"
-                    ],
-                    health: 50,
-                    hostile: false
-                },
-                
-                shopkeeper: {
-                    name: "店主",
-                    description: "杂货店的店主，正在整理货架。",
-                    dialogue: [
-                        "欢迎光临！需要些什么吗？",
-                        "生命药水？当然有，10金币一瓶。",
-                        "如果你要去森林，带根绳子可能有用。"
-                    ],
-                    health: 30,
-                    hostile: false
-                },
-                
-                guard: {
-                    name: "守卫",
-                    description: "村庄的守卫，正在站岗。",
-                    dialogue: [
-                        "保持警惕，冒险者。最近外面不太安全。",
-                        "如果你要离开村庄，最好带上武器。",
-                        "北边的森林最近有地精出没，小心点。"
-                    ],
-                    health: 60,
-                    hostile: false
-                },
-                
-                goblin: {
-                    name: "地精",
-                    description: "一个丑陋的地精，手持粗糙的木棒。",
-                    dialogue: [
-                        "嘎！人类！离开我们的森林！",
-                        "地精部落会消灭所有入侵者！",
-                        "嘎嘎！我要把你的金币都抢走！"
-                    ],
-                    health: 30,
-                    damage: 8,
-                    hostile: true,
-                    loot: ["gold_coin", "gold_coin"]
-                },
-                
-                troll: {
-                    name: "洞穴巨魔",
-                    description: "一个巨大的洞穴巨魔，散发着恶臭。",
-                    dialogue: [
-                        "吼！谁胆敢闯入我的洞穴！",
-                        "我要把你碾成肉酱！",
-                        "巨魔喜欢闪亮的东西！把你的金币交出来！"
-                    ],
-                    health: 80,
-                    damage: 15,
-                    hostile: true,
-                    loot: ["magic_amulet", "gold_coin", "gold_coin", "gold_coin"]
-                }
-            },
-            
-            commands: {
-                look: {
-                    description: "查看当前房间的描述",
-                    execute: function() {
-                        const room = gameData.rooms[gameData.player.location];
-                        outputRoomDescription(room);
-                    }
-                },
-                
-                go: {
-                    description: "移动到指定方向",
-                    execute: function(direction) {
-                        const room = gameData.rooms[gameData.player.location];
-                        
-                        if (room.exits[direction]) {
-                            gameData.player.location = room.exits[direction];
-                            const newRoom = gameData.rooms[gameData.player.location];
-                            outputGameMessage(`你向${direction}移动。`);
-                            outputRoomDescription(newRoom);
-                            updateUI();
-                        } else {
-                            outputGameMessage(`你不能往${direction}走。`, "error");
-                        }
-                    }
-                },
-                
-                get: {
-                    description: "拾取物品",
-                    execute: function(itemName) {
-                        const room = gameData.rooms[gameData.player.location];
-                        const itemKey = findItemInList(room.items, itemName);
-                        
-                        if (itemKey) {
-                            // 从房间移除物品
-                            room.items = room.items.filter(item => item !== itemKey);
-                            
-                            // 添加到玩家库存
-                            gameData.player.inventory.push(itemKey);
-                            
-                            outputGameMessage(`你拾取了${gameData.items[itemKey].name}。`, "item");
-                            updateUI();
-                        } else {
-                            outputGameMessage(`这里没有"${itemName}"。`, "error");
-                        }
-                    }
-                },
-                
-                drop: {
-                    description: "丢弃物品",
-                    execute: function(itemName) {
-                        const itemKey = findItemInList(gameData.player.inventory, itemName);
-                        
-                        if (itemKey) {
-                            // 从玩家库存移除
-                            gameData.player.inventory = gameData.player.inventory.filter(item => item !== itemKey);
-                            
-                            // 添加到房间
-                            gameData.rooms[gameData.player.location].items.push(itemKey);
-                            
-                            outputGameMessage(`你丢弃了${gameData.items[itemKey].name}。`, "item");
-                            updateUI();
-                        } else {
-                            outputGameMessage(`你没有"${itemName}"。`, "error");
-                        }
-                    }
-                },
-                
-                use: {
-                    description: "使用物品",
-                    execute: function(itemName) {
-                        const itemKey = findItemInList(gameData.player.inventory, itemName);
-                        
-                        if (itemKey) {
-                            const item = gameData.items[itemKey];
-                            
-                            if (item.type === "consumable") {
-                                // 使用消耗品
-                                gameData.player.health = Math.min(
-                                    gameData.player.maxHealth, 
-                                    gameData.player.health + item.heal
-                                );
-                                
-                                // 从库存移除
-                                gameData.player.inventory = gameData.player.inventory.filter(i => i !== itemKey);
-                                
-                                outputGameMessage(`你使用了${item.name}，恢复了${item.heal}点生命值。`, "item");
-                                updateUI();
-                            } else {
-                                outputGameMessage(`你不能使用${item.name}。`, "error");
-                            }
-                        } else {
-                            outputGameMessage(`你没有"${itemName}"。`, "error");
-                        }
-                    }
-                },
-                
-                talk: {
-                    description: "与NPC交谈",
-                    execute: function(npcName) {
-                        const room = gameData.rooms[gameData.player.location];
-                        const npcKey = findNPCInList(room.npcs, npcName);
-                        
-                        if (npcKey) {
-                            const npc = gameData.npcs[npcKey];
-                            const dialogue = npc.dialogue[Math.floor(Math.random() * npc.dialogue.length)];
-                            
-                            outputGameMessage(`${npc.name}说："${dialogue}"`, "npc");
-                        } else {
-                            outputGameMessage(`这里没有"${npcName}"。`, "error");
-                        }
-                    }
-                },
-                
-                attack: {
-                    description: "攻击NPC",
-                    execute: function(npcName) {
-                        const room = gameData.rooms[gameData.player.location];
-                        const npcKey = findNPCInList(room.npcs, npcName);
-                        
-                        if (npcKey) {
-                            const npc = gameData.npcs[npcKey];
-                            
-                            if (npc.hostile) {
-                                // 计算玩家伤害
-                                let playerDamage = 2; // 基础伤害
-                                
-                                // 检查武器
-                                const weapon = gameData.player.inventory.find(item => 
-                                    gameData.items[item].type === "weapon"
-                                );
-                                
-                                if (weapon) {
-                                    playerDamage += gameData.items[weapon].damage;
-                                }
-                                
-                                // 攻击NPC
-                                npc.health -= playerDamage;
-                                outputGameMessage(`你攻击了${npc.name}，造成了${playerDamage}点伤害。`, "combat");
-                                
-                                // 检查NPC是否死亡
-                                if (npc.health <= 0) {
-                                    outputGameMessage(`你击败了${npc.name}！`, "combat");
-                                    
-                                    // 移除NPC
-                                    room.npcs = room.npcs.filter(n => n !== npcKey);
-                                    
-                                    // 掉落物品
-                                    if (npc.loot) {
-                                        npc.loot.forEach(item => {
-                                            room.items.push(item);
-                                        });
-                                        outputGameMessage(`${npc.name}掉落了一些物品。`, "item");
-                                    }
-                                } else {
-                                    // NPC反击
-                                    const npcDamage = npc.damage || 5;
-                                    gameData.player.health -= npcDamage;
-                                    outputGameMessage(`${npc.name}反击，对你造成了${npcDamage}点伤害。`, "combat");
-                                    
-                                    // 检查玩家是否死亡
-                                    if (gameData.player.health <= 0) {
-                                        outputGameMessage("你被击败了！游戏结束。", "combat");
-                                        gameData.player.health = 0;
-                                    }
-                                }
-                                
-                                updateUI();
-                            } else {
-                                outputGameMessage(`${npc.name}是友善的，你不能攻击他。`, "error");
-                            }
-                        } else {
-                            outputGameMessage(`这里没有"${npcName}"。`, "error");
-                        }
-                    }
-                },
-                
-                inventory: {
-                    description: "查看背包",
-                    execute: function() {
-                        if (gameData.player.inventory.length === 0) {
-                            outputGameMessage("你的背包是空的。");
-                        } else {
-                            outputGameMessage("你的背包中有：");
-                            gameData.player.inventory.forEach(itemKey => {
-                                const item = gameData.items[itemKey];
-                                outputGameMessage(`- ${item.name}: ${item.description}`);
-                            });
-                        }
-                    }
-                },
-                
-                help: {
-                    description: "显示帮助信息",
-                    execute: function() {
-                        outputGameMessage("可用命令:");
-                        Object.keys(gameData.commands).forEach(command => {
-                            outputGameMessage(`- ${command}: ${gameData.commands[command].description}`);
-                        });
-                    }
-                }
-            }
-        };
-
-        // 工具函数
-        function findItemInList(itemList, itemName) {
-            return itemList.find(itemKey => {
-                const item = gameData.items[itemKey];
-                return item.name.toLowerCase().includes(itemName.toLowerCase());
-            });
-        }
-
-        function findNPCInList(npcList, npcName) {
-            return npcList.find(npcKey => {
-                const npc = gameData.npcs[npcKey];
-                return npc.name.toLowerCase().includes(npcName.toLowerCase());
-            });
-        }
-
-        // UI更新函数
-        function outputGameMessage(message, type = "normal") {
-            const output = document.getElementById("game-output");
-            const messageDiv = document.createElement("div");
-            messageDiv.className = `game-message ${type}-message`;
-            messageDiv.textContent = message;
-            output.appendChild(messageDiv);
-            output.scrollTop = output.scrollHeight;
-        }
-
-        function outputRoomDescription(room) {
-            const output = document.getElementById("game-output");
-            
-            // 清空输出
-            output.innerHTML = "";
-            
-            // 输出房间标题和描述
-            const titleDiv = document.createElement("div");
-            titleDiv.className = "room-title";
-            titleDiv.textContent = room.name;
-            output.appendChild(titleDiv);
-            
-            const descDiv = document.createElement("div");
-            descDiv.className = "room-description";
-            descDiv.textContent = room.description;
-            output.appendChild(descDiv);
-            
-            // 输出出口
-            const exitsDiv = document.createElement("div");
-            exitsDiv.className = "room-exits";
-            exitsDiv.textContent = `出口: ${Object.keys(room.exits).join(", ")}`;
-            output.appendChild(exitsDiv);
-            
-            output.scrollTop = output.scrollHeight;
-        }
-
-        function updateUI() {
-            // 更新玩家状态
-            document.getElementById("player-health").textContent = gameData.player.health;
-            document.getElementById("player-location").textContent = gameData.rooms[gameData.player.location].name;
-            document.getElementById("player-gold").textContent = gameData.player.gold;
-            
-            // 更新房间物品列表
-            const roomItemsList = document.getElementById("room-items");
-            roomItemsList.innerHTML = "";
-            
-            const currentRoom = gameData.rooms[gameData.player.location];
-            currentRoom.items.forEach(itemKey => {
-                const item = gameData.items[itemKey];
-                const li = document.createElement("li");
-                li.textContent = item.name;
-                roomItemsList.appendChild(li);
-            });
-            
-            if (currentRoom.items.length === 0) {
-                const li = document.createElement("li");
-                li.textContent = "无";
-                roomItemsList.appendChild(li);
-            }
-            
-            // 更新房间NPC列表
-            const roomNPCsList = document.getElementById("room-npcs");
-            roomNPCsList.innerHTML = "";
-            
-            currentRoom.npcs.forEach(npcKey => {
-                const npc = gameData.npcs[npcKey];
-                const li = document.createElement("li");
-                li.textContent = npc.name;
-                roomNPCsList.appendChild(li);
-            });
-            
-            if (currentRoom.npcs.length === 0) {
-                const li = document.createElement("li");
-                li.textContent = "无";
-                roomNPCsList.appendChild(li);
-            }
-            
-            // 更新玩家物品列表
-            const playerInventoryList = document.getElementById("player-inventory");
-            playerInventoryList.innerHTML = "";
-            
-            gameData.player.inventory.forEach(itemKey => {
-                const item = gameData.items[itemKey];
-                const li = document.createElement("li");
-                li.className = "inventory-item";
-                
-                const itemName = document.createElement("span");
-                itemName.textContent = item.name;
-                
-                const itemActions = document.createElement("div");
-                itemActions.className = "item-actions";
-                
-                if (item.type === "consumable") {
-                    const useButton = document.createElement("button");
-                    useButton.className = "item-action";
-                    useButton.textContent = "使用";
-                    useButton.onclick = () => {
-                        executeCommand("use", item.name);
-                    };
-                    itemActions.appendChild(useButton);
-                }
-                
-                const dropButton = document.createElement("button");
-                dropButton.className = "item-action";
-                dropButton.textContent = "丢弃";
-                dropButton.onclick = () => {
-                    executeCommand("drop", item.name);
-                };
-                itemActions.appendChild(dropButton);
-                
-                li.appendChild(itemName);
-                li.appendChild(itemActions);
-                playerInventoryList.appendChild(li);
-            });
-            
-            if (gameData.player.inventory.length === 0) {
-                const li = document.createElement("li");
-                li.textContent = "无";
-                playerInventoryList.appendChild(li);
-            }
-        }
-
-        // 命令执行函数
-        function executeCommand(command, argument = "") {
-            if (gameData.commands[command]) {
-                gameData.commands[command].execute(argument);
-            } else {
-                outputGameMessage(`未知命令: ${command}。输入"help"查看可用命令。`, "error");
-            }
-        }
-
-        // 初始化游戏
-        function initGame() {
-            // 显示初始房间描述
-            const initialRoom = gameData.rooms[gameData.player.location];
-            outputRoomDescription(initialRoom);
-            
-            // 更新UI
-            updateUI();
-            
-            // 设置命令输入处理
-            const gameInput = document.getElementById("game-input");
-            gameInput.addEventListener("keypress", function(e) {
-                if (e.key === "Enter") {
-                    const input = this.value.trim();
-                    this.value = "";
+            // 检查密码
+            submitPassword.addEventListener('click', function() {
+                const password = passwordInput.value.trim();
+                if (password === CORRECT_PASSWORD) {
+                    errorMessage.textContent = '';
+                    passwordScreen.style.display = 'none';
+                    loading.style.display = 'block';
                     
-                    if (input) {
-                        // 输出玩家输入
-                        const output = document.getElementById("game-output");
-                        const inputDiv = document.createElement("div");
-                        inputDiv.style.color = "#0f0";
-                        inputDiv.textContent = `> ${input}`;
-                        output.appendChild(inputDiv);
-                        output.scrollTop = output.scrollHeight;
-                        
-                        // 解析并执行命令
-                        const parts = input.split(" ");
-                        const command = parts[0].toLowerCase();
-                        const argument = parts.slice(1).join(" ");
-                        
-                        executeCommand(command, argument);
-                    }
+                    // 模拟加载延迟
+                    setTimeout(loadNovelContent, 1000);
+                } else {
+                    errorMessage.textContent = '密码错误，请重新输入';
+                    passwordInput.value = '';
+                    passwordInput.focus();
                 }
             });
             
-            // 欢迎信息
-            outputGameMessage("欢迎来到单机版MUD游戏！输入'help'查看可用命令。");
-        }
+            // 监听回车键
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitPassword.click();
+                }
+            });
+            
+            // 加载小说内容
+            function loadNovelContent() {
+                // 在实际应用中，这里应该使用fetch API加载novel.txt
+                // 由于是静态示例，我们使用模拟数据
+                
+                // 模拟小说内容
+                const simulatedContent = `
+《全球灾变：我成了世界树》
 
-        // 启动游戏
-        window.onload = initGame;
+第1章 世界树
+
+    平行世界，华国，阳城。
+    
+    2050年7月30号。
+    
+    叶枫缓缓睁开了眼睛，映入眼帘的是郁郁葱葱的树木，还有透过树叶缝隙洒落下来的斑驳阳光。
+    
+    “我这是在哪里？”叶枫有些茫然的坐了起来，但下一瞬他就愣住了。
+    
+    因为他的视野很奇怪，明明他是坐着的，但看到的却是俯视的视角，而且视线所及之处，竟然全都是树顶。
+    
+    他下意识的想要低头，却发现自己做不到，这时他才后知后觉的发现，自己好像变成了一棵树。
+    
+    “我变成了一棵树？”叶枫感觉有点荒谬。
+    
+    但还不等他多想，一股庞大的记忆流，便涌入到了他的脑海当中。
+    
+    片刻后，叶枫终于明白发生了什么事情。
+    
+    他重生了，重生到了一棵世界树上面。
+    
+    世界树，是这个世界最为神奇的植物，没有之一。
+    
+    因为每一棵世界树，都代表着一个世界。
+    
+    而叶枫重生的这个世界树，代表的就是人类所在的世界。
+    
+    但此时，这棵世界树的状态，却非常的糟糕。
+
+第2章 树根网络
+
+    叶枫感受着自身的情况，眉头紧皱。
+    
+    因为他发现，这棵世界树的根系，竟然有超过90%都处于枯萎状态。
+    
+    这可不是什么好消息。
+    
+    世界树的根系，代表的就是这个世界的地脉网络。
+    
+    地脉网络越发达，这个世界就越稳固，能够承载的生灵也越多。
+    
+    反之，如果地脉网络枯萎，那么这个世界就会变得脆弱，甚至最终走向崩溃。
+    
+    “按照世界树传承给我的记忆，这棵世界树最巅峰的时候，根系几乎遍布整个星球。”
+    
+    “但现在，根系覆盖的范围，连巅峰时期的十分之一都不到。”叶枫感受着地底深处，那稀稀疏疏的根茎网络，有些无奈。
+    
+    虽然情况很糟糕，但叶枫很快就振作了起来。
+    
+    因为世界树根系枯萎，并非不可逆的。
+    
+    只要他能够吸收到足够的灵气，就能让根系重新生长，甚至超越以往。
+    
+    但问题是，这个世界灵气稀薄，甚至可以说是近乎于无。
+    
+    “等等，不对！”突然叶枫神情一动。
+    
+    因为他发现，自己这棵世界树，并非完全不能吸收灵气。
+    
+    在那些还没有枯萎的根茎上，叶枫感受到了一种奇特的能量波动。
+    
+    这种能量波动很微弱，但确实存在。
+    
+    叶枫立即仔细的感应起来。
+    
+    很快，他就发现了这些能量的来源，竟然是人类。
+    
+    “信仰之力？”叶枫有些惊讶。
+
+第3章 信仰之力
+
+    在叶枫的感知当中，距离他这棵世界树大概10公里外，有着一座城市。
+    
+    这座城市名为阳城，人口大概有100万。
+    
+    而在阳城当中，有着大量的信仰之力，正从城市各处升腾而起，然后汇聚到世界树的根系当中。
+    
+    这些信仰之力很微弱，但数量却不少。
+    
+    叶枫仔细的感应了一下，发现这些信仰之力，竟然来自于人类对于各种事物的信仰。
+    
+    比如，有人信仰金钱，那么就会产生金钱相关的信仰之力。
+    
+    有人信仰权利，那么就会产生权利相关的信仰之力。
+    
+    甚至有人信仰明星，也会产生相应的信仰之力。
+    
+    而这些信仰之力，最终都会被世界树吸收。
+    
+    “原来如此，人类产生的信仰之力，竟然能够被世界树吸收，转化为灵气。”叶枫恍然大悟。
+    
+    但很快，他又发现了问题。
+    
+    那就是这些信仰之力太杂了。
+    
+    金钱、权利、明星等等，这些信仰之力都带有强烈的个人欲望，吸收起来效率极低。
+    
+    世界树真正需要的，是纯粹的信仰之力。
+    
+    比如，对于大自然的敬畏，对于生命的尊重，或者对于某种精神的信仰。
+    
+    这种纯粹的信仰之力，世界树吸收起来效率极高。
+    
+    而人类产生的这些杂乱的信仰之力，世界树吸收之后，还需要花费大量的精力去提纯，效率不到十分之一。
+    
+    “不行，这样下去，世界树想要恢复，还不知道要等到猴年马月。”叶枫眉头紧皱。
+    
+    他必须要想办法，让人类产生更多纯粹的信仰之力。
+    
+    “或许，我可以主动引导人类信仰？”叶枫脑海中，突然冒出了一个大胆的想法。
+                `;
+                
+                // 解析小说内容
+                parseNovelContent(simulatedContent);
+                
+                // 隐藏加载动画，显示阅读器
+                loading.style.display = 'none';
+                readerContainer.style.display = 'flex';
+                
+                // 渲染第一章内容
+                renderChapterContent(novelData.currentChapterIndex);
+            }
+            
+            // 解析小说内容
+            function parseNovelContent(content) {
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+                
+                // 提取书名（第一行）
+                novelData.title = lines[0].replace(/[《》]/g, '');
+                bookTitle.textContent = novelData.title;
+                
+                let currentChapter = null;
+                
+                // 从第二行开始解析
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    // 检测章节行（以"第"开头，包含"章"）
+                    if (line.startsWith('第') && line.includes('章')) {
+                        // 保存前一章
+                        if (currentChapter) {
+                            novelData.chapters.push(currentChapter);
+                        }
+                        
+                        // 开始新章节
+                        currentChapter = {
+                            title: line,
+                            content: []
+                        };
+                    } else if (currentChapter) {
+                        // 添加内容到当前章节（跳过空行）
+                        if (line) {
+                            // 将行内容添加到章节内容
+                            currentChapter.content.push(line);
+                        }
+                    }
+                }
+                
+                // 添加最后一章
+                if (currentChapter) {
+                    novelData.chapters.push(currentChapter);
+                }
+                
+                // 更新章节指示器
+                updateChapterIndicator();
+            }
+            
+            // 渲染章节内容
+            function renderChapterContent(chapterIndex) {
+                if (chapterIndex < 0 || chapterIndex >= novelData.chapters.length) {
+                    return;
+                }
+                
+                const chapter = novelData.chapters[chapterIndex];
+                chapterTitle.textContent = chapter.title;
+                
+                // 渲染内容
+                readerContent.innerHTML = '';
+                chapter.content.forEach(paragraph => {
+                    const p = document.createElement('p');
+                    p.textContent = paragraph;
+                    readerContent.appendChild(p);
+                });
+                
+                // 更新章节指示器
+                updateChapterIndicator();
+            }
+            
+            // 更新章节指示器
+            function updateChapterIndicator() {
+                chapterIndicator.textContent = `第${novelData.currentChapterIndex + 1}章/共${novelData.chapters.length}章`;
+            }
+            
+            // 上一章按钮事件
+            prevChapterBtn.addEventListener('click', function() {
+                if (novelData.currentChapterIndex > 0) {
+                    novelData.currentChapterIndex--;
+                    renderChapterContent(novelData.currentChapterIndex);
+                    // 滚动到顶部
+                    readerContent.scrollTop = 0;
+                }
+            });
+            
+            // 下一章按钮事件
+            nextChapterBtn.addEventListener('click', function() {
+                if (novelData.currentChapterIndex < novelData.chapters.length - 1) {
+                    novelData.currentChapterIndex++;
+                    renderChapterContent(novelData.currentChapterIndex);
+                    // 滚动到顶部
+                    readerContent.scrollTop = 0;
+                }
+            });
+            
+            // 添加键盘导航
+            document.addEventListener('keydown', function(e) {
+                if (readerContainer.style.display === 'flex') {
+                    if (e.key === 'ArrowLeft') {
+                        prevChapterBtn.click();
+                    } else if (e.key === 'ArrowRight') {
+                        nextChapterBtn.click();
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
