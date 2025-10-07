@@ -247,13 +247,13 @@
         
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>正在加载小说内容...</p>
+            <p id="loadingMessage">正在加载小说内容...</p>
         </div>
         
         <div class="reader-container" id="readerContainer">
             <div class="reader-header">
                 <div class="book-title" id="bookTitle">加载中...</div>
-                <div class="chapter-title" id="chapterTitle">第1章 世界树</div>
+                <div class="chapter-title" id="chapterTitle">第1章</div>
             </div>
             
             <div class="reader-content" id="readerContent">
@@ -265,7 +265,7 @@
                     <button id="prevChapter">上一章</button>
                     <button id="nextChapter">下一章</button>
                 </div>
-                <div class="chapter-indicator" id="chapterIndicator">第1章/共10章</div>
+                <div class="chapter-indicator" id="chapterIndicator">第1章/共0章</div>
             </div>
         </div>
     </div>
@@ -278,6 +278,7 @@
             const submitPassword = document.getElementById('submitPassword');
             const errorMessage = document.getElementById('errorMessage');
             const loading = document.getElementById('loading');
+            const loadingMessage = document.getElementById('loadingMessage');
             const readerContainer = document.getElementById('readerContainer');
             const bookTitle = document.getElementById('bookTitle');
             const chapterTitle = document.getElementById('chapterTitle');
@@ -304,8 +305,8 @@
                     passwordScreen.style.display = 'none';
                     loading.style.display = 'block';
                     
-                    // 模拟加载延迟
-                    setTimeout(loadNovelContent, 1000);
+                    // 加载小说内容
+                    loadNovelContent();
                 } else {
                     errorMessage.textContent = '密码错误，请重新输入';
                     passwordInput.value = '';
@@ -321,147 +322,59 @@
             });
             
             // 加载小说内容
-            function loadNovelContent() {
-                // 在实际应用中，这里应该使用fetch API加载novel.txt
-                // 由于是静态示例，我们使用模拟数据
-                
-                // 模拟小说内容
-                const simulatedContent = `
-《全球灾变：我成了世界树》
-
-第1章 世界树
-
-    平行世界，华国，阳城。
-    
-    2050年7月30号。
-    
-    叶枫缓缓睁开了眼睛，映入眼帘的是郁郁葱葱的树木，还有透过树叶缝隙洒落下来的斑驳阳光。
-    
-    “我这是在哪里？”叶枫有些茫然的坐了起来，但下一瞬他就愣住了。
-    
-    因为他的视野很奇怪，明明他是坐着的，但看到的却是俯视的视角，而且视线所及之处，竟然全都是树顶。
-    
-    他下意识的想要低头，却发现自己做不到，这时他才后知后觉的发现，自己好像变成了一棵树。
-    
-    “我变成了一棵树？”叶枫感觉有点荒谬。
-    
-    但还不等他多想，一股庞大的记忆流，便涌入到了他的脑海当中。
-    
-    片刻后，叶枫终于明白发生了什么事情。
-    
-    他重生了，重生到了一棵世界树上面。
-    
-    世界树，是这个世界最为神奇的植物，没有之一。
-    
-    因为每一棵世界树，都代表着一个世界。
-    
-    而叶枫重生的这个世界树，代表的就是人类所在的世界。
-    
-    但此时，这棵世界树的状态，却非常的糟糕。
-
-第2章 树根网络
-
-    叶枫感受着自身的情况，眉头紧皱。
-    
-    因为他发现，这棵世界树的根系，竟然有超过90%都处于枯萎状态。
-    
-    这可不是什么好消息。
-    
-    世界树的根系，代表的就是这个世界的地脉网络。
-    
-    地脉网络越发达，这个世界就越稳固，能够承载的生灵也越多。
-    
-    反之，如果地脉网络枯萎，那么这个世界就会变得脆弱，甚至最终走向崩溃。
-    
-    “按照世界树传承给我的记忆，这棵世界树最巅峰的时候，根系几乎遍布整个星球。”
-    
-    “但现在，根系覆盖的范围，连巅峰时期的十分之一都不到。”叶枫感受着地底深处，那稀稀疏疏的根茎网络，有些无奈。
-    
-    虽然情况很糟糕，但叶枫很快就振作了起来。
-    
-    因为世界树根系枯萎，并非不可逆的。
-    
-    只要他能够吸收到足够的灵气，就能让根系重新生长，甚至超越以往。
-    
-    但问题是，这个世界灵气稀薄，甚至可以说是近乎于无。
-    
-    “等等，不对！”突然叶枫神情一动。
-    
-    因为他发现，自己这棵世界树，并非完全不能吸收灵气。
-    
-    在那些还没有枯萎的根茎上，叶枫感受到了一种奇特的能量波动。
-    
-    这种能量波动很微弱，但确实存在。
-    
-    叶枫立即仔细的感应起来。
-    
-    很快，他就发现了这些能量的来源，竟然是人类。
-    
-    “信仰之力？”叶枫有些惊讶。
-
-第3章 信仰之力
-
-    在叶枫的感知当中，距离他这棵世界树大概10公里外，有着一座城市。
-    
-    这座城市名为阳城，人口大概有100万。
-    
-    而在阳城当中，有着大量的信仰之力，正从城市各处升腾而起，然后汇聚到世界树的根系当中。
-    
-    这些信仰之力很微弱，但数量却不少。
-    
-    叶枫仔细的感应了一下，发现这些信仰之力，竟然来自于人类对于各种事物的信仰。
-    
-    比如，有人信仰金钱，那么就会产生金钱相关的信仰之力。
-    
-    有人信仰权利，那么就会产生权利相关的信仰之力。
-    
-    甚至有人信仰明星，也会产生相应的信仰之力。
-    
-    而这些信仰之力，最终都会被世界树吸收。
-    
-    “原来如此，人类产生的信仰之力，竟然能够被世界树吸收，转化为灵气。”叶枫恍然大悟。
-    
-    但很快，他又发现了问题。
-    
-    那就是这些信仰之力太杂了。
-    
-    金钱、权利、明星等等，这些信仰之力都带有强烈的个人欲望，吸收起来效率极低。
-    
-    世界树真正需要的，是纯粹的信仰之力。
-    
-    比如，对于大自然的敬畏，对于生命的尊重，或者对于某种精神的信仰。
-    
-    这种纯粹的信仰之力，世界树吸收起来效率极高。
-    
-    而人类产生的这些杂乱的信仰之力，世界树吸收之后，还需要花费大量的精力去提纯，效率不到十分之一。
-    
-    “不行，这样下去，世界树想要恢复，还不知道要等到猴年马月。”叶枫眉头紧皱。
-    
-    他必须要想办法，让人类产生更多纯粹的信仰之力。
-    
-    “或许，我可以主动引导人类信仰？”叶枫脑海中，突然冒出了一个大胆的想法。
-                `;
-                
-                // 解析小说内容
-                parseNovelContent(simulatedContent);
-                
-                // 隐藏加载动画，显示阅读器
-                loading.style.display = 'none';
-                readerContainer.style.display = 'flex';
-                
-                // 渲染第一章内容
-                renderChapterContent(novelData.currentChapterIndex);
+            async function loadNovelContent() {
+                try {
+                    loadingMessage.textContent = '正在加载小说内容...';
+                    
+                    // 使用fetch API获取novel.txt文件
+                    const response = await fetch('novel.txt');
+                    
+                    if (!response.ok) {
+                        throw new Error(`文件加载失败: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    const content = await response.text();
+                    
+                    if (!content || content.trim().length === 0) {
+                        throw new Error('小说文件为空');
+                    }
+                    
+                    // 解析小说内容
+                    parseNovelContent(content);
+                    
+                    // 隐藏加载动画，显示阅读器
+                    loading.style.display = 'none';
+                    readerContainer.style.display = 'flex';
+                    
+                    // 渲染第一章内容
+                    renderChapterContent(novelData.currentChapterIndex);
+                } catch (error) {
+                    console.error('加载小说失败:', error);
+                    loadingMessage.textContent = `加载失败: ${error.message}`;
+                    
+                    // 5秒后返回密码输入界面
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                        passwordScreen.style.display = 'block';
+                        errorMessage.textContent = '小说加载失败，请检查novel.txt文件是否存在';
+                    }, 5000);
+                }
             }
             
             // 解析小说内容
             function parseNovelContent(content) {
                 const lines = content.split('\n').filter(line => line.trim() !== '');
                 
+                if (lines.length === 0) {
+                    throw new Error('小说内容为空');
+                }
+                
                 // 提取书名（第一行）
                 novelData.title = lines[0].replace(/[《》]/g, '');
                 bookTitle.textContent = novelData.title;
                 
                 let currentChapter = null;
+                let chapterCount = 0;
                 
                 // 从第二行开始解析
                 for (let i = 1; i < lines.length; i++) {
@@ -469,6 +382,7 @@
                     
                     // 检测章节行（以"第"开头，包含"章"）
                     if (line.startsWith('第') && line.includes('章')) {
+                        chapterCount++;
                         // 保存前一章
                         if (currentChapter) {
                             novelData.chapters.push(currentChapter);
@@ -491,6 +405,10 @@
                 // 添加最后一章
                 if (currentChapter) {
                     novelData.chapters.push(currentChapter);
+                }
+                
+                if (novelData.chapters.length === 0) {
+                    throw new Error('未找到任何章节内容');
                 }
                 
                 // 更新章节指示器
@@ -516,6 +434,10 @@
                 
                 // 更新章节指示器
                 updateChapterIndicator();
+                
+                // 更新按钮状态
+                prevChapterBtn.disabled = (chapterIndex === 0);
+                nextChapterBtn.disabled = (chapterIndex === novelData.chapters.length - 1);
             }
             
             // 更新章节指示器
